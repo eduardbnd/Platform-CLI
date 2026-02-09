@@ -12,6 +12,7 @@ This project implements Platform Engineering concepts: it provides developers wi
 
 
 🖥️ EC2 (Virtual Machines)
+
 Smart Provisioning: Automatically retrieves the latest Amazon Linux 2 AMI via AWS Systems Manager (SSM).
 
 Guardrails: Restricts usage to cost-effective instance types only (t3.micro, t3.small).
@@ -22,6 +23,7 @@ Security: Prevents accidental deletion of other users' servers via ownership tag
 
 
 🌐 Route53 (DNS)
+
 Automation: Automatically constructs FQDNs (e.g., input app becomes app.project.com.).
 
 Isolation: Zone filtering — users only see and manage zones created via this tool.
@@ -34,6 +36,7 @@ CRUD: Full lifecycle management (Create zones, Add/Delete records).
 
 
 🗄️ S3 (Storage)
+
 Rapid bucket creation with mandatory automatic tagging.
 
 Streamed file uploads via Web UI (files are uploaded directly to AWS without saving to local disk).
@@ -41,8 +44,8 @@ Streamed file uploads via Web UI (files are uploaded directly to AWS without sav
 
 
 
-
 🛠️ Tech Stack
+
 Python 3.8+ — Core logic and automation.
 
 Boto3 — AWS SDK for cloud interaction.
@@ -71,23 +74,31 @@ Python-Dotenv — Configuration and secrets management.
 🚀 Installation & Setup
 1. Clone the repository
 git clone https://github.com/eduardbnd/Platform-CLI.git
+
 cd platform-cli
 
 2. Create Virtual Environment
+
 Isolate project dependencies:
 
 Windows:
+
 python -m venv venv
+
 .\venv\Scripts\activate
 
 Mac/Linux:
+
 python3 -m venv venv
+
 source venv/bin/activate
 
 3. Install Dependencies
+
 pip install -r requirements.txt
 
 4. Configure Secrets (.env)
+
 Create a .env file in the project root.
 Important: This file contains secrets and is added to .gitignore, so it will not be pushed to the repository.
 
@@ -109,6 +120,7 @@ Add the following credentials:
 5. TAG_OWNER=your_value
 
 💻 Usage (CLI)
+
 Command Line Interface for engineers and automation scripts.
 
 # Server Management (EC2)
@@ -163,6 +175,7 @@ python main.py s3 upload <bucket_name> ./<your_file>
 
 
 🌐 Usage (Web UI)
+
 Self-Service Portal for developers.
 
 # Run the application:
@@ -175,4 +188,5 @@ Self-Service Portal for developers.
 All resources created via this platform are automatically tagged
 
 Author: Eduard Bondarenko 
+
 Year: 2026
