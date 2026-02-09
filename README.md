@@ -77,7 +77,7 @@ Add the following credentials:
 # AWS Credentials
 AWS_ACCESS_KEY_ID=your_access_key
 AWS_SECRET_ACCESS_KEY=your_secret_key
-AWS_REGION=us-east-1
+AWS_REGION=your_region
 
 # Tagging Governance
 TAG_CREATED_BY=your_value
@@ -87,34 +87,34 @@ TAG_OWNER=your_value
 Command Line Interface for engineers and automation scripts.
 Server Management (EC2)
 
-# Create server (AMI is found automatically)
-python main.py ec2 create --name web-server --key my-ssh-key
+# Create server
+python main.py ec2 create --name <server name> --key <your key> --type <t3.micro or t3.small>
 
-# List instances (filters only "my" servers)
+# List instances
 python main.py ec2 list
 
 # Stop server
 python main.py ec2 stop <INSTANCE_ID>
 
-# Terminate server (requires confirmation)
+# Terminate server
 python main.py ec2 terminate <INSTANCE_ID>
 
 DNS Management (Route53)
 # 1. Create Hosted Zone
-python main.py route53 create-zone myproject.com
+python main.py route53 create-zone <name of your zone>
 
-# 2. Add Record (e.g., app.myproject.com -> 1.1.1.1)
-python main.py route53 add-record <ZONE_ID> app 1.1.1.1
+# 2. Add Record
+python main.py route53 add-record <ZONE_ID> <name of your record> <ip(ex. 1.1.1.1)>
 
 # 3. Delete Record
-python main.py route53 delete-record <ZONE_ID> app 1.1.1.1
+python main.py route53 delete-record <ZONE_ID> <name of your record> <ip(ex. 1.1.1.1)>
 
 File Management (S3)
 # Create bucket
-python main.py s3 create-bucket my-unique-bucket-name
+python main.py s3 create-bucket <bucket_name>
 
 # Upload file
-python main.py s3 upload my-unique-bucket-name ./local-file.txt
+python main.py s3 upload <bucket_name> ./<your_file>
 
 
 🌐 Usage (Web UI)
