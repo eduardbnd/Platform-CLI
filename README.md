@@ -189,6 +189,16 @@ Self-Service Portal for developers.
 
 All resources created via this platform are automatically tagged
 
+🧹 Cleanup Instructions
+
+To avoid unexpected AWS charges, please clean up resources after testing:
+
+1. EC2: Run terminate for all instances.
+
+2. S3: Delete all objects, then delete the buckets.
+
+3. Route53: Delete records, then delete the Hosted Zones.
+
 Author: Eduard Bondarenko 
 
 Year: 2026
