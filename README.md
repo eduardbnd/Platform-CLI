@@ -186,6 +186,7 @@ Self-Service Portal for developers.
 3. Use the sidebar menu to navigate between services.
 
 🏷️ Tagging Policy (Governance)
+
 All resources created via this platform are automatically tagged
 
 Author: Eduard Bondarenko 
