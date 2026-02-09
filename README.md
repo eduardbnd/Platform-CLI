@@ -5,7 +5,11 @@ Internal Developer Platform (IDP) for automated and secure AWS resource manageme
 This project implements Platform Engineering concepts: it provides developers with a convenient interface (CLI and Web UI) to work with the cloud, abstracting away AWS API complexity while enforcing automatic Guardrails and tagging standards.
 
 
+
+
 ⚡ Key Features
+
+
 
 🖥️ EC2 (Virtual Machines)
 Smart Provisioning: Automatically retrieves the latest Amazon Linux 2 AMI via AWS Systems Manager (SSM).
@@ -13,6 +17,9 @@ Smart Provisioning: Automatically retrieves the latest Amazon Linux 2 AMI via AW
 Guardrails: Restricts usage to cost-effective instance types only (t3.micro, t3.small).
 
 Security: Prevents accidental deletion of other users' servers via ownership tag verification.
+
+
+
 
 🌐 Route53 (DNS)
 Automation: Automatically constructs FQDNs (e.g., input app becomes app.project.com.).
@@ -23,10 +30,16 @@ Idempotency: Uses UPSERT actions for safe record updates.
 
 CRUD: Full lifecycle management (Create zones, Add/Delete records).
 
+
+
+
 🗄️ S3 (Storage)
 Rapid bucket creation with mandatory automatic tagging.
 
 Streamed file uploads via Web UI (files are uploaded directly to AWS without saving to local disk).
+
+
+
 
 
 🛠️ Tech Stack
@@ -41,12 +54,18 @@ Streamlit — Framework for the Self-Service Web Portal.
 Python-Dotenv — Configuration and secrets management.
 
 
+
+
+
 📋 Prerequisites
 1. Python 3.8 or higher installed.
 
 2. AWS Account.
 
 3. Access Keys (Access Key ID & Secret Access Key).
+
+
+
 
 
 🚀 Installation & Setup
@@ -74,10 +93,16 @@ Important: This file contains secrets and is added to .gitignore, so it will not
 
 Add the following credentials:
 
+
+
+
 # AWS Credentials
 AWS_ACCESS_KEY_ID=your_access_key
 AWS_SECRET_ACCESS_KEY=your_secret_key
 AWS_REGION=your_region
+
+
+
 
 # Tagging Governance
 TAG_CREATED_BY=your_value
@@ -87,19 +112,36 @@ TAG_OWNER=your_value
 Command Line Interface for engineers and automation scripts.
 Server Management (EC2)
 
+
+
+
 # Create server
 python main.py ec2 create --name <server name> --key <your key> --type <t3.micro or t3.small>
+
+
+
 
 # List instances
 python main.py ec2 list
 
+
+
+
 # Stop server
 python main.py ec2 stop <INSTANCE_ID>
+
+
+
 
 # Terminate server
 python main.py ec2 terminate <INSTANCE_ID>
 
-DNS Management (Route53)
+
+
+
+# DNS Management (Route53)
+
+
 # 1. Create Hosted Zone
 python main.py route53 create-zone <name of your zone>
 
@@ -109,7 +151,11 @@ python main.py route53 add-record <ZONE_ID> <name of your record> <ip(ex. 1.1.1.
 # 3. Delete Record
 python main.py route53 delete-record <ZONE_ID> <name of your record> <ip(ex. 1.1.1.1)>
 
-File Management (S3)
+
+
+
+# File Management (S3)
+
 # Create bucket
 python main.py s3 create-bucket <bucket_name>
 
