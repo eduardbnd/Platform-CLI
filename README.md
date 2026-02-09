@@ -97,16 +97,16 @@ Add the following credentials:
 
 
 # AWS Credentials
-AWS_ACCESS_KEY_ID=your_access_key
-AWS_SECRET_ACCESS_KEY=your_secret_key
-AWS_REGION=your_region
+1. AWS_ACCESS_KEY_ID=your_access_key
+2. AWS_SECRET_ACCESS_KEY=your_secret_key
+3. AWS_REGION=your_region
 
 
 
 
 # Tagging Governance
-TAG_CREATED_BY=your_value
-TAG_OWNER=your_value
+4. TAG_CREATED_BY=your_value
+5. TAG_OWNER=your_value
 
 💻 Usage (CLI)
 Command Line Interface for engineers and automation scripts.
