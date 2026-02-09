@@ -166,11 +166,11 @@ python main.py s3 upload <bucket_name> ./<your_file>
 🌐 Usage (Web UI)
 Self-Service Portal for developers.
 
-Run the application:
+# Run the application:
 
-streamlit run app.py
-Open your browser at: http://localhost:8501
-Use the sidebar menu to navigate between services.
+1. streamlit run app.py
+2. Open your browser at: http://localhost:8501
+3. Use the sidebar menu to navigate between services.
 
 🏷️ Tagging Policy (Governance)
 All resources created via this platform are automatically tagged
