@@ -110,9 +110,8 @@ Add the following credentials:
 
 💻 Usage (CLI)
 Command Line Interface for engineers and automation scripts.
-Server Management (EC2)
 
-
+# Server Management (EC2)
 
 
 # Create server
