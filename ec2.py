@@ -55,7 +55,7 @@ def create(instance_type, key_name, name):
     response = ec2_client.describe_instances(
         Filters=[
             {'Name': 'tag:CreatedBy', 'Values': [TAG_CREATED_BY]},
-            {'Name': 'instance-state-name', 'Values': ['running', 'pending']}
+            {'Name': 'instance-state-name', 'Values': ['running', 'pending', 'stopping', 'stopped']}
         ]
     )
     current_count = sum(len(r['Instances']) for r in response['Reservations'])
