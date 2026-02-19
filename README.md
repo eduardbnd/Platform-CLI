@@ -145,6 +145,11 @@ python main.py route53 list
 python main.py route53 delete-record <ZONE_ID> <name of your record> <ip(ex. 1.1.1.1)>
 ```
 
+**5. Delete Hosted Zone**
+```bash
+python main.py route53 delete-zone <ZONE_ID>
+```
+
 ### 🗄️ File Management (S3)
 
 **Create bucket**

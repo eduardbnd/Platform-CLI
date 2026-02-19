@@ -185,3 +185,30 @@ def delete_record(zone_id, subdomain, ip_address):
         click.echo("✅ Record deleted.")
     except Exception as e:
         click.echo(f"AWS Error: {e}", err=True)
+
+# Delete Zone
+@route53.command()
+@click.argument('zone_id')
+def delete_zone(zone_id):
+    """Delete a Hosted Zone."""
+    client = get_route53_client()
+
+    try:
+        tags_resp = client.list_tags_for_resource(ResourceType='hostedzone', ResourceId=zone_id)
+        tags = {t['Key']: t['Value'] for t in tags_resp['ResourceTagSet']['Tags']}
+        
+        if tags.get('CreatedBy') != TAG_CREATED_BY:
+            click.echo(f"❌ Error: Zone {zone_id} is not managed by platform-cli!", err=True)
+            return
+    except Exception as e:
+        click.echo(f"Permission error: {e}", err=True)
+        return
+
+    click.echo(f"🗑️ Deleting Hosted Zone {zone_id}...")
+    
+    try:
+        client.delete_hosted_zone(Id=zone_id)
+        click.echo("✅ Zone deleted successfully.")
+    except Exception as e:
+        click.echo(f"❌ AWS Error: {e}", err=True)
+        click.echo("💡 Hint: You must delete all custom A-records inside the zone before deleting the zone itself.")
