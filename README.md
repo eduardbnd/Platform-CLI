@@ -88,8 +88,8 @@ TAG_CREATED_BY=your_value
 TAG_OWNER=your_value
 
 # Tagging Governance
-4. TAG_CREATED_BY=your_value
-5. TAG_OWNER=your_value
+TAG_CREATED_BY=your_value
+TAG_OWNER=your_value
 ```
 
 ## 💻 Usage (CLI)
