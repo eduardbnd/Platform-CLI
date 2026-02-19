@@ -112,6 +112,10 @@ python main.py ec2 list
 ```bash
 python main.py ec2 stop <INSTANCE_ID>
 ```
+**Start server**
+```bash
+python main.py ec2 start <INSTANCE_ID>
+```
 
 **Terminate server**
 ```bash
