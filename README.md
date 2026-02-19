@@ -185,6 +185,7 @@ streamlit run app.py
 2. Open your browser at: `http://localhost:8501`
 3. Use the sidebar menu to navigate between services.
 
+![Platform Demo](images/demo-ui.png)
 ---
 
 ## 🏷️ Tagging Policy (Governance)
