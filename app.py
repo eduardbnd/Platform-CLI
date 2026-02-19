@@ -1,6 +1,7 @@
 import streamlit as st
 import boto3
 import os
+import time
 from dotenv import load_dotenv
 
 # 1. Load configuration
@@ -51,27 +52,39 @@ if menu == "EC2 (Servers)":
             st.info("AMI will be retrieved automatically from SSM")
 
         if st.button("Launch Instance"):
-            with st.spinner("Finding AMI and launching..."):
-                try:
-                    ami_id = get_latest_ami()
-                    ec2.run_instances(
-                        ImageId=ami_id,
-                        InstanceType=instance_type,
-                        KeyName=key_name,
-                        MinCount=1, MaxCount=1,
-                        TagSpecifications=[{
-                            'ResourceType': 'instance',
-                            'Tags': [
-                                {'Key': 'Name', 'Value': name},
-                                {'Key': 'CreatedBy', 'Value': TAG_CREATED_BY},
-                                {'Key': 'Owner', 'Value': TAG_OWNER}
-                            ]
-                        }]
-                    )
-                    st.success(f"Instance '{name}' is launching!")
-                    st.rerun() # Refresh page
-                except Exception as e:
-                    st.error(f"Error: {e}")
+            limit_resp = ec2.describe_instances(
+                Filters=[
+                    {'Name': 'tag:CreatedBy', 'Values': [TAG_CREATED_BY]},
+                    {'Name': 'instance-state-name', 'Values': ['running', 'pending', 'stopping', 'stopped']}
+                ]
+            )
+            count = sum(len(r['Instances']) for r in limit_resp['Reservations'])
+            
+            if count >= 2:
+                st.error("❌ Limit reached: You cannot have more than 2 instances (running or stopped).")
+            else:
+                with st.spinner("Finding AMI and launching..."):
+                    try:
+                        ami_id = get_latest_ami()
+                        ec2.run_instances(
+                            ImageId=ami_id,
+                            InstanceType=instance_type,
+                            KeyName=key_name,
+                            MinCount=1, MaxCount=1,
+                            TagSpecifications=[{
+                                'ResourceType': 'instance',
+                                'Tags': [
+                                    {'Key': 'Name', 'Value': name},
+                                    {'Key': 'CreatedBy', 'Value': TAG_CREATED_BY},
+                                    {'Key': 'Owner', 'Value': TAG_OWNER}
+                                ]
+                            }]
+                        )
+                        st.success(f"Instance '{name}' is launching!")
+                        time.sleep(1)
+                        st.rerun() # Refresh page
+                    except Exception as e:
+                        st.error(f"Error: {e}")
 
     # --- INSTANCE LIST ---
     st.subheader("My Active Instances")
@@ -103,13 +116,15 @@ if menu == "EC2 (Servers)":
             if c1.button("▶️ Start"):
                 ec2.start_instances(InstanceIds=[selected_id])
                 st.toast(f"Starting {selected_id}...")
-            if c2.button("tj Stop"):
+                time.sleep(1); st.rerun()
+            if c2.button("🛑 Stop"):
                 ec2.stop_instances(InstanceIds=[selected_id])
                 st.toast(f"Stopping {selected_id}...")
-            if c3.button("🗑️ Terminate"):
+                time.sleep(1); st.rerun()
+            if c3.button("🗑️ Terminate", type="primary"):
                 ec2.terminate_instances(InstanceIds=[selected_id])
                 st.warning(f"Instance {selected_id} is being terminated.")
-                st.rerun()
+                time.sleep(1); st.rerun()
         else:
             st.info("No active instances found.")
             
@@ -141,26 +156,23 @@ elif menu == "S3 (Storage)":
                 st.error("Confirm public bucket creation.")
             else:
                 try:
-                    # Create
                     if AWS_REGION == 'us-east-1':
                         s3.create_bucket(Bucket=b_name)
                     else:
                         s3.create_bucket(Bucket=b_name, CreateBucketConfiguration={'LocationConstraint': AWS_REGION})
                     
-                    # Tags
                     s3.put_bucket_tagging(
                         Bucket=b_name,
                         Tagging={'TagSet': [{'Key': 'CreatedBy', 'Value': TAG_CREATED_BY}, {'Key': 'Owner', 'Value': TAG_OWNER}]}
                     )
                     
-                    # Permissions
                     if is_public:
                         s3.delete_public_access_block(Bucket=b_name)
                     else:
                         s3.put_public_access_block(Bucket=b_name, PublicAccessBlockConfiguration={'BlockPublicAcls': True, 'IgnorePublicAcls': True, 'BlockPublicPolicy': True, 'RestrictPublicBuckets': True})
                         
                     st.success(f"Bucket {b_name} created!")
-                    st.rerun()
+                    time.sleep(1); st.rerun()
                 except Exception as e:
                     st.error(f"Error: {e}")
 
@@ -181,11 +193,30 @@ elif menu == "S3 (Storage)":
         if my_buckets:
             selected_bucket = st.selectbox("Select bucket to manage", my_buckets)
             
-            # UPLOAD FILE
+            # UPLOAD FILE & DELETE BUCKET CONTROLS
             uploaded_file = st.file_uploader("Upload file")
-            if uploaded_file and st.button("Upload"):
-                s3.upload_fileobj(uploaded_file, selected_bucket, uploaded_file.name)
-                st.success("File uploaded!")
+            
+            col_up, col_del = st.columns(2)
+            with col_up:
+                if uploaded_file and st.button("Upload File"):
+                    s3.upload_fileobj(uploaded_file, selected_bucket, uploaded_file.name)
+                    st.success("File uploaded!")
+            
+            with col_del:
+                st.write("") # Spacer
+                st.write("") # Spacer
+                if st.button("🗑️ Delete Bucket", type="primary"):
+                    with st.spinner("Emptying and deleting bucket..."):
+                        try:
+                            objs = s3.list_objects_v2(Bucket=selected_bucket)
+                            if 'Contents' in objs:
+                                for obj in objs['Contents']:
+                                    s3.delete_object(Bucket=selected_bucket, Key=obj['Key'])
+                            s3.delete_bucket(Bucket=selected_bucket)
+                            st.success("Bucket deleted successfully!")
+                            time.sleep(1); st.rerun()
+                        except Exception as e:
+                            st.error(f"Error deleting bucket: {e}")
                 
         else:
             st.info("No buckets found.")
@@ -204,7 +235,6 @@ elif menu == "Route53 (DNS)":
     with st.expander("➕ Create Hosted Zone"):
         domain = st.text_input("Domain (e.g., project.com)")
         if st.button("Create Zone"):
-            import time
             ref = f"{domain}-{int(time.time())}"
             try:
                 res = r53.create_hosted_zone(Name=domain, CallerReference=ref)
@@ -216,7 +246,7 @@ elif menu == "Route53 (DNS)":
                         AddTags=[{'Key': 'CreatedBy', 'Value': TAG_CREATED_BY}, {'Key': 'Owner', 'Value': TAG_OWNER}]
                     )
                     st.success(f"Zone {domain} created!")
-                    st.rerun()
+                    time.sleep(1); st.rerun()
                 else:
                     st.error("Zone created but no ID returned.")
             except Exception as e:
@@ -250,7 +280,6 @@ elif menu == "Route53 (DNS)":
         
         if table_data:
             st.table(table_data)
-            
             st.divider()
             
             # --- MANAGE RECORDS ---
@@ -280,7 +309,7 @@ elif menu == "Route53 (DNS)":
                         }
                     )
                     st.success(f"Added {full_name} -> {ip}")
-                    st.rerun()
+                    time.sleep(1); st.rerun()
                 except Exception as e:
                     st.error(f"Error: {e}")
 
@@ -288,7 +317,6 @@ elif menu == "Route53 (DNS)":
 
             # --- DELETE RECORD LIST ---
             st.write("📋 **Existing A-Records (Delete)**")
-            
             try:
                 rr_resp = r53.list_resource_record_sets(HostedZoneId=target_zone_id)
                 records = rr_resp.get('ResourceRecordSets', [])
@@ -321,7 +349,7 @@ elif menu == "Route53 (DNS)":
                                     }
                                 )
                                 st.warning(f"Deleted {r_name}")
-                                st.rerun()
+                                time.sleep(1); st.rerun()
                             except Exception as e:
                                 st.error(f"Error deleting: {e}")
                 else:
@@ -329,6 +357,17 @@ elif menu == "Route53 (DNS)":
 
             except Exception as e:
                 st.error(f"Error fetching records: {e}")
+
+            # --- DELETE ENTIRE ZONE ---
+            st.divider()
+            st.write("🧨 **Danger Zone**")
+            if st.button("🗑️ Delete Entire Hosted Zone", type="primary"):
+                try:
+                    r53.delete_hosted_zone(Id=target_zone_id)
+                    st.success(f"Zone {target_zone_name} deleted successfully!")
+                    time.sleep(1); st.rerun()
+                except Exception as e:
+                    st.error(f"Error: {e} (Hint: Delete all custom A-records first!)")
 
         else:
             st.info("No zones found (checked tags).")
