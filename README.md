@@ -154,12 +154,21 @@ python main.py route53 delete-zone <ZONE_ID>
 
 **Create bucket**
 ```bash
-python main.py s3 create-bucket <bucket_name>
+python main.py s3 create <bucket_name>
+```
+**List buckets**
+```bash
+python main.py s3 list
 ```
 
 **Upload file**
 ```bash
 python main.py s3 upload <bucket_name> ./<your_file>
+```
+
+**Delete bucket (and all its contents)**
+```bash
+python main.py s3 delete <bucket_name>
 ```
 
 ## 🌐 Usage (Web UI)

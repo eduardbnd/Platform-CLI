@@ -20,6 +20,7 @@ def s3():
     """Manage S3 Buckets."""
     pass
 
+# Create bucket
 @s3.command()
 @click.argument('bucket_name')
 @click.option('--public', is_flag=True, help='Make bucket public (Dangerous!)')
@@ -36,7 +37,6 @@ def create(bucket_name, public):
             return
 
     try:
-        # Create bucket
         if region == 'us-east-1':
             s3_client.create_bucket(Bucket=bucket_name)
         else:
@@ -72,6 +72,7 @@ def create(bucket_name, public):
     except ClientError as e:
         click.echo(f"AWS Error: {e}", err=True)
 
+# List Buckets
 @s3.command()
 def list():
     """List ONLY our buckets."""
@@ -100,6 +101,7 @@ def list():
     except Exception as e:
         click.echo(f"Error: {e}", err=True)
 
+# Upload Files
 @s3.command()
 @click.argument('bucket_name')
 @click.argument('file_path')
@@ -115,5 +117,37 @@ def upload(bucket_name, file_path):
         click.echo(f"⬆️ Uploading '{file_name}'...")
         s3_client.upload_file(file_path, bucket_name, file_name)
         click.echo(f"✅ Success! File uploaded.")
+    except Exception as e:
+        click.echo(f"AWS Error: {e}", err=True)
+
+# Delete Bucket
+@s3.command(name='delete')
+@click.argument('bucket_name')
+def delete_bucket(bucket_name):
+    """Delete an S3 bucket (and all its files)."""
+    s3_client = get_s3_client()
+
+    try:
+        tags_resp = s3_client.get_bucket_tagging(Bucket=bucket_name)
+        tags = {t['Key']: t['Value'] for t in tags_resp.get('TagSet', [])}
+        
+        if tags.get('CreatedBy') != TAG_CREATED_BY:
+            click.echo(f"❌ Error: Bucket '{bucket_name}' is not managed by platform-cli!", err=True)
+            return
+    except Exception as e:
+        click.echo(f"Permission error or bucket doesn't exist: {e}", err=True)
+        return
+
+    click.echo(f"🗑️ Deleting bucket '{bucket_name}' and all its contents...")
+    
+    try:
+        objects = s3_client.list_objects_v2(Bucket=bucket_name)
+        if 'Contents' in objects:
+            for obj in objects['Contents']:
+                s3_client.delete_object(Bucket=bucket_name, Key=obj['Key'])
+                click.echo(f"   🗑️ Deleted file: {obj['Key']}")
+                
+        s3_client.delete_bucket(Bucket=bucket_name)
+        click.echo("✅ Bucket deleted successfully.")
     except Exception as e:
         click.echo(f"AWS Error: {e}", err=True)
