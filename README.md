@@ -135,7 +135,12 @@ python main.py route53 create-zone <name of your zone>
 python main.py route53 add-record <ZONE_ID> <name of your record> <ip(ex. 1.1.1.1)>
 ```
 
-**3. Delete Record**
+**3. List Zones and Record**
+```bash
+python main.py route53 list
+```
+
+**4. Delete Record**
 ```bash
 python main.py route53 delete-record <ZONE_ID> <name of your record> <ip(ex. 1.1.1.1)>
 ```

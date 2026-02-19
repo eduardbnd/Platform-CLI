@@ -20,6 +20,7 @@ def route53():
     """Manage Route53 DNS Zones."""
     pass
 
+# Create zone
 @route53.command()
 @click.argument('domain_name')
 def create_zone(domain_name):
@@ -51,6 +52,7 @@ def create_zone(domain_name):
     except Exception as e:
         click.echo(f"AWS Error: {e}", err=True)
 
+# List zones
 @route53.command()
 def list():
     """List ONLY our zones."""
@@ -70,6 +72,11 @@ def list():
                 if tags.get('CreatedBy') == TAG_CREATED_BY:
                     found = True
                     click.echo(f"{zone_id:<20} {zone['Name']:<25} {zone['ResourceRecordSetCount']}")
+                    records_resp = client.list_resource_record_sets(HostedZoneId=zone_id)
+                    for r_set in records_resp['ResourceRecordSets']:
+                        if r_set['Type'] == 'A':
+                            values = ", ".join([v['Value'] for v in r_set.get('ResourceRecords', [])])
+                            click.echo(f"    ↳ Record: {r_set['Name']} -> {values}")
             except Exception:
                 continue
 
@@ -78,6 +85,7 @@ def list():
     except Exception as e:
         click.echo(f"Error: {e}", err=True)
 
+# Add record
 @route53.command()
 @click.argument('zone_id')
 @click.argument('subdomain')
@@ -118,7 +126,7 @@ def add_record(zone_id, subdomain, ip_address):
             'Changes': [{
                 'Action': 'UPSERT',
                 'ResourceRecordSet': {
-                    'Name': full_record_name, # <-- Используем полное имя
+                    'Name': full_record_name,
                     'Type': 'A', 
                     'TTL': 300,
                     'ResourceRecords': [{'Value': ip_address}]
